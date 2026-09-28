@@ -2,7 +2,8 @@
 //   ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='long password' npm run db:seed
 import { config } from "dotenv";
 
-config({ path: ".env.local", quiet: true });
+// ENV_FILE=.env.production.local targets the live database instead of the local one.
+config({ path: process.env.ENV_FILE ?? ".env.local", quiet: true });
 
 const { db } = await import("../src/server/db");
 const { seed } = await import("../src/server/db/seed-data");

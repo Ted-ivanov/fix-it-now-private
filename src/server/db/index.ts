@@ -3,7 +3,14 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 function createDb(url: string) {
-  const client = postgres(url, { max: 10 });
+  const serverless = !!process.env.VERCEL;
+  const client = postgres(url, {
+    // Serverless functions run many small instances: keep each one's pool small.
+    max: serverless ? 3 : 10,
+    idle_timeout: serverless ? 20 : undefined,
+    // Neon's pooled URL ("-pooler") goes through PgBouncer, which needs unnamed statements.
+    prepare: !url.includes("-pooler"),
+  });
   return drizzle(client, { schema, casing: "snake_case" });
 }
 

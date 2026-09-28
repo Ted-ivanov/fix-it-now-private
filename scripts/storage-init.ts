@@ -2,7 +2,9 @@
 // For Cloudflare R2, create the buckets in the dashboard; this script then only sets CORS.
 import { config } from "dotenv";
 
-config({ path: ".env.local", quiet: true });
+// ENV_FILE=.env.production.local targets the live storage instead of the local one.
+// On R2 the "public read" step is expected to fail: public access is switched on in the dashboard.
+config({ path: process.env.ENV_FILE ?? ".env.local", quiet: true });
 
 const { CreateBucketCommand, PutBucketCorsCommand, PutBucketPolicyCommand } = await import(
   "@aws-sdk/client-s3"
