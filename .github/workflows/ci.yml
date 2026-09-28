@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fixit
+          POSTGRES_PASSWORD: fixit
+          POSTGRES_DB: fixit_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U fixit" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://fixit:fixit@localhost:5432/fixit_test
+      # Build-time placeholders; nothing connects to these during the build.
+      DATABASE_URL: postgres://fixit:fixit@localhost:5432/fixit_test
+      BETTER_AUTH_SECRET: ci-only-secret-ci-only-secret-ci-only-secret
+      BETTER_AUTH_URL: http://localhost:3000
+      SITE_URL: http://localhost:3000
+      S3_ACCESS_KEY_ID: ci
+      S3_SECRET_ACCESS_KEY: ci
+      S3_PUBLIC_BUCKET: public
+      S3_PRIVATE_BUCKET: private
+      S3_PUBLIC_URL: http://localhost:8333/public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

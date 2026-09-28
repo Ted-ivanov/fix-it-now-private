@@ -1,0 +1,251 @@
+{
+  "meta": {
+    "siteName": "Fix It Now",
+    "title": "Fix It Now – small home repairs",
+    "description": "Electrical, plumbing, interior finishing and small repairs at home. Book an inspection or a repair visit online."
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "ourWork": "Our work",
+    "ourWorkShort": "Projects",
+    "book": "Book now",
+    "contact": "Contact",
+    "call": "Call us",
+    "language": "Language",
+    "switchTo": "Български",
+    "skipToContent": "Skip to content",
+    "menu": "Menu"
+  },
+  "home": {
+    "title": "Welcome to Fix It Now!",
+    "subtitle": "We handle small home repairs. Choose the service you need.",
+    "categoriesLabel": "Choose a service"
+  },
+  "category": {
+    "chooseVisit": "What kind of visit do you need?",
+    "back": "All services",
+    "inspection": {
+      "title": "Inspection & Quote",
+      "description": "A technician comes over, assesses the problem and gives you a price before any work starts.",
+      "bestFor": "Best when you're not sure what's wrong."
+    },
+    "repair": {
+      "title": "Book a Repair Visit",
+      "description": "The team arrives with the tools and materials to fix the problem on the first visit.",
+      "bestFor": "Best when you know exactly what needs fixing."
+    },
+    "duration": "About {minutes, plural, =60 {1 hour} other {# minutes}}",
+    "durationHours": "About {hours} h",
+    "choose": "Choose"
+  },
+  "disclaimer": {
+    "title": "Are you sure what the problem is?",
+    "body": "By choosing this option you confirm that you are sure what the problem is. If it turns out to be a different problem on site, an extra charge may apply.",
+    "accept": "I understand, continue",
+    "switchToInspection": "Book an inspection instead"
+  },
+  "booking": {
+    "title": "Book a visit",
+    "steps": {
+      "date": "Date",
+      "time": "Time",
+      "details": "Details",
+      "done": "Done"
+    },
+    "service": "Service",
+    "visit": "Visit",
+    "pickDate": "Pick a date",
+    "pickTime": "Pick a time",
+    "noSlots": "No free times on this date. Please choose another.",
+    "noDays": "There are no free dates right now. Call us and we'll find a time.",
+    "loading": "Loading…",
+    "selected": "{date} at {time}",
+    "change": "Change",
+    "continue": "Continue",
+    "back": "Back",
+    "fields": {
+      "name": "Full name",
+      "phone": "Phone",
+      "phoneHint": "For example 0888 123 456",
+      "email": "Email",
+      "emailHint": "We'll send you a confirmation",
+      "address": "Address",
+      "addressHint": "City, street, number, entrance, floor",
+      "description": "Describe the problem",
+      "descriptionHint": "What isn't working, since when, is anything urgent",
+      "photos": "Photos of the problem (optional)",
+      "photosHint": "Up to {max} photos. They help the team come prepared.",
+      "addPhotos": "Add photos",
+      "removePhoto": "Remove photo",
+      "consent": "I agree to my personal data being processed for this visit as described in the <link>Privacy Policy</link>."
+    },
+    "submit": "Confirm booking",
+    "submitting": "Sending…",
+    "errors": {
+      "nameRequired": "Please enter your name.",
+      "phoneInvalid": "Please enter a valid Bulgarian phone number.",
+      "emailInvalid": "Please enter a valid email.",
+      "addressRequired": "Please enter the address.",
+      "descriptionRequired": "Please describe the problem in a few words.",
+      "consentRequired": "We need your consent to continue.",
+      "tooLong": "This text is too long.",
+      "tooManyPhotos": "You can attach up to {max} photos.",
+      "photoInvalid": "One of the files is not a photo or is too large.",
+      "slotTaken": "This time was just taken. Please choose another.",
+      "rateLimited": "Too many attempts. Please try again in a little while.",
+      "captcha": "The spam check failed. Please try again.",
+      "generic": "Something went wrong. Please try again or give us a call."
+    },
+    "success": {
+      "title": "Thank you! Your visit is booked.",
+      "body": "We've sent a confirmation to {email}. We'll get in touch if we need more details.",
+      "ref": "Booking number",
+      "when": "When",
+      "backHome": "Back to home"
+    }
+  },
+  "visitTypes": {
+    "inspection": "Inspection & Quote",
+    "repair": "Repair visit"
+  },
+  "ourWork": {
+    "title": "Our work",
+    "subtitle": "Photos from jobs we've completed.",
+    "all": "All",
+    "photos": "{count, plural, one {# photo} other {# photos}}",
+    "empty": "Photos from our jobs are coming soon.",
+    "back": "All projects",
+    "close": "Close",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "photoOf": "Photo {index} of {total}"
+  },
+  "cancel": {
+    "title": "Cancel a visit",
+    "confirmQuestion": "Do you want to cancel the visit on {when}?",
+    "confirm": "Yes, cancel the visit",
+    "cancelled": "The visit has been cancelled. Thank you for letting us know.",
+    "alreadyCancelled": "This visit has already been cancelled.",
+    "tooLate": "This visit has already taken place or been completed. Please call us with any questions.",
+    "notFound": "We couldn't find this booking. The link may be wrong."
+  },
+  "contact": {
+    "title": "Contact",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Opening hours",
+    "hoursValue": "Mon–Fri 8:00–18:00, Sat 9:00–14:00",
+    "area": "Service area",
+    "areaValue": "Sofia and surroundings",
+    "viber": "Message us on Viber",
+    "whatsapp": "Message us on WhatsApp"
+  },
+  "footer": {
+    "rights": "© {year} Fix It Now. All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be wrong or the page has moved.",
+    "home": "Back to home"
+  },
+  "variants": {
+    "label": "Design",
+    "main": "Main",
+    "v2": "Quick booking",
+    "v3": "Trust",
+    "v4": "Mobile"
+  },
+  "v2": {
+    "heroTitle": "What needs fixing?",
+    "heroSubtitle": "Describe the problem in a few words and book in a minute.",
+    "searchPlaceholder": "For example: bathroom tap is leaking",
+    "popular": "Popular",
+    "suggestions": {
+      "socket": "Socket not working",
+      "lights": "Install lighting",
+      "fuse": "Fuse keeps tripping",
+      "leak": "Leaking tap or drain",
+      "boiler": "Water heater problem",
+      "drain": "Blocked drain",
+      "paint": "Paint a room",
+      "tiles": "Replace tiles",
+      "drywall": "Drywall repair",
+      "furniture": "Furniture assembly",
+      "door": "Adjust a door",
+      "shelves": "Put up shelves"
+    },
+    "noMatch": "Can't find your problem? Choose a category:",
+    "summary": "Your request",
+    "stepOf": "Step {step} of {total}",
+    "promise": "We call you back within 2 working hours",
+    "freeCancel": "Free cancellation any time before the visit",
+    "howItWorks": "How it works",
+    "how1": "Pick a service and time",
+    "how2": "We confirm by phone",
+    "how3": "The team comes and fixes it"
+  },
+  "v3": {
+    "heroTitle": "Small home repairs – fast, tidy and guaranteed",
+    "heroSubtitle": "Electrical, plumbing, finishing work and small fixes. One team, one phone number.",
+    "bookNow": "Book now",
+    "callUs": "Call us",
+    "trust": {
+      "guarantee": "Work guaranteed",
+      "insured": "Insured teams",
+      "onTime": "We arrive on time",
+      "clean": "We clean up after"
+    },
+    "howTitle": "How it works",
+    "how1Title": "You book",
+    "how1": "Online in a minute or by phone.",
+    "how2Title": "We come over",
+    "how2": "For an inspection or straight to the repair, at the agreed time.",
+    "how3Title": "Done",
+    "how3": "We fix the problem and clean up after ourselves.",
+    "servicesTitle": "Our services",
+    "workTitle": "From our jobs",
+    "seeAll": "See all projects",
+    "reviewsTitle": "What customers say",
+    "reviewsPlaceholder": "Sample reviews – to be replaced with real ones.",
+    "reviews": {
+      "r1": "They arrived right on time, replaced the sockets and cleaned up afterwards.",
+      "r1Author": "Maria, Lozenets",
+      "r2": "Fixed the bathroom leak on the first visit. Recommended!",
+      "r2Author": "Georgi, Mladost",
+      "r3": "Fair prices and very friendly people.",
+      "r3Author": "Elena, Center"
+    },
+    "faqTitle": "Frequently asked questions",
+    "faq": {
+      "q1": "What's the difference between an inspection and a repair visit?",
+      "a1": "On an inspection a technician looks at the problem and gives you a price. On a repair visit the team comes prepared to fix the specific problem you described.",
+      "q2": "How much does an inspection cost?",
+      "a2": "We'll tell you the inspection price when we confirm by phone.",
+      "q3": "Can I cancel a visit?",
+      "a3": "Yes. The confirmation email has a cancellation link.",
+      "q4": "When do I pay?",
+      "a4": "On site, once the work is done."
+    },
+    "areaTitle": "Where we work",
+    "areaBody": "We serve Sofia and the surrounding area. Not sure if we come to you? Give us a call."
+  },
+  "v4": {
+    "greeting": "Hi there! 👋",
+    "intro": "How can we help today?",
+    "askCategory": "Choose the type of repair:",
+    "askVisit": "What kind of visit do you need?",
+    "askDate": "Which day suits you?",
+    "askTime": "What time?",
+    "askDetails": "Last step – your details:",
+    "quickActions": "Quick actions",
+    "restart": "Start over"
+  },
+  "legal": {
+    "privacyTitle": "Privacy Policy",
+    "termsTitle": "Terms and Conditions",
+    "draftNotice": "Draft – this content must be reviewed and completed with the company's details."
+  }
+}

@@ -1,0 +1,35 @@
+# Local development services: Postgres and SeaweedFS (S3-compatible storage, stands in for
+# Cloudflare R2). Buckets are created by `npm run setup`.
+#   docker compose up -d        start
+#   docker compose down         stop (data is kept in the volumes)
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fixit
+      POSTGRES_PASSWORD: fixit # local only
+      POSTGRES_DB: fixit
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixit -d fixit"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # S3 API on http://localhost:8333. No credentials locally: any key/secret is accepted.
+  s3:
+    image: chrislusf/seaweedfs:latest
+    command: server -s3 -dir=/data -ip.bind=0.0.0.0 -master.volumeSizeLimitMB=1024
+    ports:
+      - "8333:8333"
+    volumes:
+      - s3-data:/data
+
+volumes:
+  postgres-data:
+  s3-data:
