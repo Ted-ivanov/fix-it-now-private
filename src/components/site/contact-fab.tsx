@@ -1,13 +1,15 @@
 import { MessageCircle, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { site, viberLink } from "@/lib/site";
+import { ChatWidget } from "./chat-widget";
 
-/** Floating call and Viber buttons, always within thumb reach on phones. */
+/** Floating chat, call and Viber buttons, always within thumb reach on phones. */
 export async function ContactFab() {
   const t = await getTranslations("nav");
   const tc = await getTranslations("contact");
   return (
-    <div className="fixed right-4 bottom-4 z-40 flex flex-col gap-3 print:hidden">
+    <div className="fixed right-4 bottom-4 z-40 flex flex-col items-end gap-3 print:hidden">
+      <ChatWidget />
       {site.viber && (
         <a
           href={viberLink(site.viber)}

@@ -1,4 +1,5 @@
 import { db } from "@/server/db";
+import { googleConfigured } from "@/server/google/client";
 import { listCategoriesWithDurations, listTeams } from "@/server/services/admin";
 import { PageHeader } from "../../_components/page-header";
 import { fmtDateTime } from "../../_lib/format";
@@ -30,8 +31,19 @@ export default async function TeamsPage() {
                 label: `${fmtDateTime(o.startAt)} – ${fmtDateTime(o.endAt)}`,
                 reason: o.reason,
               })),
+              members: t.members.map((m) => ({
+                id: m.id,
+                name: m.name,
+                email: m.email,
+                reminders: m.reminders,
+                connected: m.connected,
+                googleEmail: m.googleEmail,
+                googleConnectedAt: m.googleConnectedAt?.toISOString() ?? null,
+                googleError: m.googleError,
+              })),
             }}
             categories={options}
+            googleConfigured={googleConfigured()}
           />
         ))}
         <NewTeamForm categories={options} />

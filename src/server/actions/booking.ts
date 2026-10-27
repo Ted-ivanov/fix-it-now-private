@@ -5,8 +5,10 @@ import { headers } from "next/headers";
 import { MAX_BOOKING_PHOTOS, MAX_PHOTO_BYTES, bookingRequestSchema } from "@/lib/booking-schema";
 import { db } from "@/server/db";
 import { sendNewBookingEmails } from "@/server/email/booking-emails";
+import { syncBooking } from "@/server/google/sync";
 import { UnknownServiceError } from "@/server/services/availability";
 import { createBooking, DisclaimerRequiredError, SlotTakenError } from "@/server/services/bookings";
+import { customerCalendarLinks, loadCustomerBooking } from "@/server/services/customer-calendar";
 import { processCustomerPhoto, UnsupportedImageError } from "@/server/services/images";
 import { checkRateLimit } from "@/server/services/rate-limit";
 import { verifyTurnstile } from "@/server/services/turnstile";
@@ -22,7 +24,7 @@ export type BookingErrorCode =
   | "generic";
 
 export type BookingActionResult =
-  | { ok: true; ref: string; startAt: string; email: string }
+  | { ok: true; ref: string; startAt: string; email: string; calendar: { google: string; ics: string } }
   | { ok: false; error: BookingErrorCode; fieldErrors?: Record<string, string> };
 
 async function clientIp() {
@@ -76,9 +78,16 @@ export async function submitBooking(formData: FormData): Promise<BookingActionRe
     }
 
     const created = await createBooking(db, parsed.data, uploaded);
-    // Send emails after the response so the customer isn't kept waiting.
-    after(() => sendNewBookingEmails(db, created.id));
-    return { ok: true, ref: created.ref, startAt: created.startAt.toISOString(), email: created.email };
+    // Emails and team calendars are updated after the response so the customer isn't kept waiting.
+    after(() => Promise.all([sendNewBookingEmails(db, created.id), syncBooking(db, created.id)]));
+    const row = await loadCustomerBooking(db, { id: created.id });
+    return {
+      ok: true,
+      ref: created.ref,
+      startAt: created.startAt.toISOString(),
+      email: created.email,
+      calendar: customerCalendarLinks(row),
+    };
   } catch (error) {
     await deleteObjects("private", uploaded.map((u) => u.storageKey)).catch(() => {});
     if (error instanceof SlotTakenError) return { ok: false, error: "slotTaken" };

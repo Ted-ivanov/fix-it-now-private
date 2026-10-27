@@ -17,6 +17,7 @@ import {
   updateTeamAction,
 } from "@/server/actions/admin";
 import { HoursEditor, type HoursRow } from "../../_components/hours-editor";
+import { TeamMembers, type MemberView } from "./team-members";
 
 type Option = { id: string; name: string };
 
@@ -50,6 +51,7 @@ function useAction() {
 export function TeamCard({
   team,
   categories,
+  googleConfigured,
 }: {
   team: {
     id: string;
@@ -58,8 +60,10 @@ export function TeamCard({
     categoryIds: string[];
     hours: HoursRow[];
     timeOff: { id: string; label: string; reason: string | null }[];
+    members: MemberView[];
   };
   categories: Option[];
+  googleConfigured: boolean;
 }) {
   const { pending, run, startTransition } = useAction();
   const [name, setName] = useState(team.name);
@@ -108,6 +112,15 @@ export function TeamCard({
           Изтрий
         </Button>
       </div>
+
+      <details className="rounded-lg border p-4" open={team.members.length > 0}>
+        <summary className="cursor-pointer text-sm font-medium">
+          Членове и Google Calendar ({team.members.length})
+        </summary>
+        <div className="mt-4">
+          <TeamMembers teamId={team.id} members={team.members} googleConfigured={googleConfigured} />
+        </div>
+      </details>
 
       <details className="rounded-lg border p-4" open={ownHours}>
         <summary className="cursor-pointer text-sm font-medium">Работно време на екипа</summary>

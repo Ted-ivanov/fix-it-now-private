@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: Omit<Settings, "createdAt" | "updatedAt"> = {
   bookingHorizonDays: 30,
   minNoticeHours: 12,
   notificationEmail: null,
+  contactEmails: [],
 };
 
 export async function getSettings(db: Db): Promise<Settings> {

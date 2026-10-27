@@ -1,5 +1,5 @@
 // Data access for the admin panel: bookings, teams, working hours and booking rules.
-import { and, asc, eq, gte, inArray, isNull, lt, type SQL } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, isNotNull, isNull, lt, type SQL } from "drizzle-orm";
 import type { Db } from "@/server/db";
 import {
   booking,
@@ -9,10 +9,13 @@ import {
   settings,
   team,
   teamCategory,
+  teamMember,
   teamTimeOff,
   visitTypeConfig,
   workingHours,
+  type CalendarReminder,
 } from "@/server/db/schema";
+import { decrypt } from "@/server/google/crypto";
 import { presignDownload } from "@/server/storage";
 import { addDays, sofiaInstant } from "./time";
 
@@ -86,7 +89,7 @@ export async function countBookings(db: Db, from: Date, to: Date) {
 // ---------------------------------------------------------------------------------------------
 
 export async function listTeams(db: Db) {
-  const [teams, links, hours, offs] = await Promise.all([
+  const [teams, links, hours, offs, members] = await Promise.all([
     db.select().from(team).orderBy(asc(team.name)),
     db.select().from(teamCategory),
     db.select().from(workingHours),
@@ -95,13 +98,52 @@ export async function listTeams(db: Db) {
       .from(teamTimeOff)
       .where(gte(teamTimeOff.endAt, new Date()))
       .orderBy(asc(teamTimeOff.startAt)),
+    db.select().from(teamMember).orderBy(asc(teamMember.createdAt)),
   ]);
   return teams.map((t) => ({
     ...t,
     categoryIds: links.filter((l) => l.teamId === t.id).map((l) => l.categoryId),
     hours: hours.filter((h) => h.teamId === t.id),
     timeOff: offs.filter((o) => o.teamId === t.id),
+    // Never send the encrypted token to the browser.
+    members: members
+      .filter((m) => m.teamId === t.id)
+      .map(({ googleRefreshToken, connectNonce: _nonce, ...m }) => ({ ...m, connected: googleRefreshToken !== null })),
   }));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Team members (Google Calendar)
+// ---------------------------------------------------------------------------------------------
+
+export async function createMember(db: Db, teamId: string, input: { name: string; email: string | null }) {
+  await db.insert(teamMember).values({ teamId, ...input });
+}
+
+/** Returns whether the member's calendar needs re-syncing (connected and reminders changed). */
+export async function updateMember(
+  db: Db,
+  id: string,
+  input: { name: string; email: string | null; reminders: CalendarReminder[] },
+) {
+  const [before] = await db.select().from(teamMember).where(eq(teamMember.id, id));
+  if (!before) return false;
+  await db.update(teamMember).set(input).where(eq(teamMember.id, id));
+  const remindersChanged = JSON.stringify(before.reminders) !== JSON.stringify(input.reminders);
+  return remindersChanged && before.googleRefreshToken !== null;
+}
+
+export async function deleteMember(db: Db, id: string) {
+  await db.delete(teamMember).where(eq(teamMember.id, id));
+}
+
+/** Decrypted refresh tokens of a team's connected members (to revoke them). */
+export async function memberGoogleTokens(db: Db, teamId: string) {
+  const rows = await db
+    .select({ token: teamMember.googleRefreshToken })
+    .from(teamMember)
+    .where(and(eq(teamMember.teamId, teamId), isNotNull(teamMember.googleRefreshToken)));
+  return rows.map((r) => decrypt(r.token!));
 }
 
 export async function createTeam(db: Db, name: string, categoryIds: string[]) {
@@ -172,6 +214,13 @@ export async function updateSettings(
     .insert(settings)
     .values({ id: 1, ...input })
     .onConflictDoUpdate({ target: settings.id, set: input });
+}
+
+export async function updateContactEmails(db: Db, contactEmails: string[]) {
+  await db
+    .insert(settings)
+    .values({ id: 1, contactEmails })
+    .onConflictDoUpdate({ target: settings.id, set: { contactEmails } });
 }
 
 export async function listCategoriesWithDurations(db: Db) {

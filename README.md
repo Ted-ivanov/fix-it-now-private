@@ -61,6 +61,23 @@ The seed adds these, all changeable in the admin:
 | `npm run db:seed` | Starting data + admin user (safe to re-run) |
 | `npm run db:studio` | Browse the database |
 | `npm run storage:init` | Create buckets / set CORS |
+| `npm run admin:password` | New password (and optionally new email) for an existing admin |
+
+## Google Calendar
+
+Each team member can connect their own Google Calendar (Admin → Екипи → Членове и Google Calendar). Their team's bookings are then written into it, with reminder times set per member, and removed again when a booking is cancelled. The sync is one-way: events added in Google don't block booking slots. Customers get "add to calendar" links (Google Calendar + `.ics`) in the confirmation email and on the success screen. Those work without any Google setup.
+
+How connecting works: the admin creates a link for the member and sends it to them, for example over Viber. The link works once and expires after 72 hours. The member signs in with their Google account and allows calendar access. If an email is set on the member, only that Google account is accepted. Refresh tokens are stored encrypted with a key derived from `BETTER_AUTH_SECRET`, so changing that secret disconnects every calendar.
+
+One-time setup in [Google Cloud Console](https://console.cloud.google.com/):
+
+1. Create a project, then enable the **Google Calendar API** (APIs & Services → Library).
+2. **OAuth consent screen**: set the user type to External, fill in the app name, support email and developer contact, and add the scopes `openid`, `email` and `.../auth/calendar.events`.
+3. Set the publishing status to **In production**. In *Testing* mode Google expires the connection after 7 days. Until Google verifies the app, members see an "unverified app" warning once and continue with Advanced → Continue. This works for up to 100 users.
+4. **Credentials → Create credentials → OAuth client ID → Web application**. Add these authorized redirect URIs:
+   - `https://<your-domain>/api/google/callback`
+   - `http://localhost:3000/api/google/callback` (for local development)
+5. Put the client ID and secret in `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (in `.env.local`, and in Vercel's environment variables), then redeploy.
 
 ## How booking capacity works
 

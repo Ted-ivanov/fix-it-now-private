@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { Db } from "@/server/db";
 import { booking, bookingPhoto, serviceCategory } from "@/server/db/schema";
 import { env } from "@/server/env";
+import { cancelUrl, customerCalendarLinks } from "@/server/services/customer-calendar";
 import { getSettings } from "@/server/services/settings";
 import { TIME_ZONE } from "@/server/services/time";
 import { pick } from "@/lib/localized";
@@ -24,10 +25,6 @@ export function formatWhen(date: Date, locale: "bg" | "en") {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
-}
-
-function cancelUrl(locale: "bg" | "en", token: string) {
-  return locale === "bg" ? `${env.SITE_URL}/otkazvane/${token}` : `${env.SITE_URL}/en/cancel/${token}`;
 }
 
 async function load(db: Db, bookingId: string) {
@@ -60,7 +57,7 @@ export async function sendNewBookingEmails(db: Db, bookingId: string) {
     sendEmail({
       to: row.booking.email,
       subject: bookingConfirmationSubject(lang, row.booking.ref),
-      react: BookingConfirmationEmail({ lang, data: emailData(row, lang) }),
+      react: BookingConfirmationEmail({ lang, data: emailData(row, lang), calendar: customerCalendarLinks(row) }),
     }),
   ];
 

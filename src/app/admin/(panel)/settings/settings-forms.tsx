@@ -14,6 +14,7 @@ import {
   deleteClosedDayAction,
   setWorkingHoursAction,
   updateCategoryAction,
+  updateContactEmailsAction,
   updateSettingsAction,
 } from "@/server/actions/admin";
 import { HoursEditor, type HoursRow } from "../../_components/hours-editor";
@@ -307,5 +308,54 @@ export function CategoryEditor({ category }: { category: CategoryState }) {
         Запази услугата
       </Button>
     </section>
+  );
+}
+
+export function ContactEmailsForm({ initial, fallback }: { initial: string[]; fallback: string | null }) {
+  const { pending, save } = useSave();
+  const [emails, setEmails] = useState(initial.length > 0 ? initial : [""]);
+  const update = (i: number, value: string) => setEmails((list) => list.map((e, j) => (j === i ? value : e)));
+
+  return (
+    <Card
+      title="Имейли за запитвания от чата"
+      description={
+        fallback
+          ? `Всяко запитване от чат асистента се изпраща до тези адреси. Ако списъкът е празен, се използва ${fallback}.`
+          : "Всяко запитване от чат асистента се изпраща до тези адреси."
+      }
+    >
+      <ul className="grid max-w-md gap-2">
+        {emails.map((email, i) => (
+          <li key={i} className="flex items-center gap-2">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => update(i, e.target.value)}
+              placeholder="ime@firma.bg"
+              aria-label={`Имейл ${i + 1}`}
+            />
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label="Премахни"
+              onClick={() => setEmails((list) => (list.length > 1 ? list.filter((_, j) => j !== i) : [""]))}
+            >
+              <Trash2 className="size-4" aria-hidden />
+            </Button>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" onClick={() => setEmails((list) => [...list, ""])} disabled={emails.length >= 20}>
+          <Plus className="size-4" aria-hidden />
+          Добави имейл
+        </Button>
+        <Button disabled={pending} onClick={() => save(() => updateContactEmailsAction(emails))}>
+          {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
+          Запази имейлите
+        </Button>
+      </div>
+    </Card>
   );
 }

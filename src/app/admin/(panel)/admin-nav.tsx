@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, ExternalLink, Images, LayoutDashboard, LogOut, Settings, Users } from "lucide-react";
+import { CalendarDays, ExternalLink, Images, Inbox, LayoutDashboard, LogOut, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/site/logo";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 const items = [
   { href: "/admin", label: "Табло", icon: LayoutDashboard, exact: true },
   { href: "/admin/bookings", label: "Резервации", icon: CalendarDays },
+  { href: "/admin/inquiries", label: "Запитвания", icon: Inbox },
   { href: "/admin/galleries", label: "Галерии", icon: Images },
   { href: "/admin/teams", label: "Екипи", icon: Users },
   { href: "/admin/settings", label: "Настройки", icon: Settings },

@@ -20,6 +20,11 @@ const schema = z.object({
   EMAIL_FROM: z.string().default("Fix It Now <no-reply@example.com>"),
 
   TURNSTILE_SECRET_KEY: z.string().optional(), // without it the captcha check is skipped
+
+  // Google Calendar for team members (OAuth client of type "Web application").
+  // Without them the admin shows members but hides the "Connect Google Calendar" links.
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
 // `next build` loads server modules without the real secrets (e.g. in a Docker build).

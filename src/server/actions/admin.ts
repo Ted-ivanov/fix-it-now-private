@@ -2,11 +2,16 @@
 
 // Admin mutations. Every action re-checks the session: server actions are public endpoints.
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { db } from "@/server/db";
 import { requireAdmin } from "@/server/auth";
 import { sendBookingCancelledEmail } from "@/server/email/booking-emails";
+import { revokeToken } from "@/server/google/client";
+import { createConnectLink, disconnectGoogle } from "@/server/google/connect";
+import { syncBooking, syncMemberUpcoming } from "@/server/google/sync";
 import * as admin from "@/server/services/admin";
+import * as contactRequests from "@/server/services/contact-requests";
 import * as galleries from "@/server/services/galleries";
 import { sofiaInstant } from "@/server/services/time";
 import { presignUpload } from "@/server/storage";
@@ -48,7 +53,9 @@ export async function setBookingStatusAction(id: string, status: admin.BookingSt
   return run(async () => {
     const parsed = z.object({ id: uuid, status: z.enum(["pending", "confirmed", "done", "cancelled"]) }).parse({ id, status });
     const updated = await admin.setBookingStatus(db, parsed.id, parsed.status);
-    if (updated && parsed.status === "cancelled" && notifyCustomer) await sendBookingCancelledEmail(db, updated.id);
+    if (!updated) return;
+    after(() => syncBooking(db, updated.id));
+    if (parsed.status === "cancelled" && notifyCustomer) await sendBookingCancelledEmail(db, updated.id);
   });
 }
 
@@ -79,9 +86,64 @@ export async function updateTeamAction(id: string, input: z.input<typeof teamInp
 
 export async function deleteTeamAction(id: string) {
   await requireAdmin();
-  const result = await admin.deleteTeam(db, uuid.parse(id));
+  const teamId = uuid.parse(id);
+  // A team is only deleted when it has no bookings, so its members' calendars hold no events:
+  // revoking their Google access is enough.
+  const tokens = await admin.memberGoogleTokens(db, teamId);
+  const result = await admin.deleteTeam(db, teamId);
+  if (result.deleted) await Promise.all(tokens.map(revokeToken));
   refresh();
   return result;
+}
+
+const memberInput = z.object({
+  name: z.string().trim().min(1).max(100),
+  email: z.union([z.email(), z.literal("")]).transform((v) => v.toLowerCase() || null),
+});
+
+export async function createMemberAction(teamId: string, input: z.input<typeof memberInput>) {
+  return run(() => admin.createMember(db, uuid.parse(teamId), memberInput.parse(input)));
+}
+
+const reminders = z
+  .array(
+    z.object({
+      method: z.enum(["popup", "email"]),
+      minutes: z.number().int().min(0).max(40320), // Google's limit: 4 weeks
+    }),
+  )
+  .max(5);
+
+export async function updateMemberAction(
+  id: string,
+  input: z.input<typeof memberInput> & { reminders: z.input<typeof reminders> },
+) {
+  return run(async () => {
+    const memberId = uuid.parse(id);
+    const resync = await admin.updateMember(db, memberId, {
+      ...memberInput.parse(input),
+      reminders: reminders.parse(input.reminders),
+    });
+    // Update the reminders on the events that are already in the calendar.
+    if (resync) after(() => syncMemberUpcoming(db, memberId));
+  });
+}
+
+export async function deleteMemberAction(id: string) {
+  return run(async () => {
+    const memberId = uuid.parse(id);
+    await disconnectGoogle(db, memberId);
+    await admin.deleteMember(db, memberId);
+  });
+}
+
+export async function createConnectLinkAction(memberId: string) {
+  await requireAdmin();
+  return { url: await createConnectLink(db, uuid.parse(memberId)) };
+}
+
+export async function disconnectGoogleAction(memberId: string) {
+  return run(() => disconnectGoogle(db, uuid.parse(memberId)));
 }
 
 const hoursRows = z
@@ -261,4 +323,29 @@ export async function reorderPhotosAction(galleryId: string, orderedIds: string[
 
 export async function setCoverAction(galleryId: string, photoId: string) {
   return run(() => galleries.setCover(db, uuid.parse(galleryId), uuid.parse(photoId)));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Chat bot contact requests
+// ---------------------------------------------------------------------------------------------
+
+export async function updateContactEmailsAction(emails: string[]) {
+  return run(() =>
+    admin.updateContactEmails(
+      db,
+      z
+        .array(z.string().trim().toLowerCase().pipe(z.email()))
+        .max(20)
+        .transform((list) => [...new Set(list)])
+        .parse(emails.filter((e) => e.trim())),
+    ),
+  );
+}
+
+export async function setContactRequestHandledAction(id: string, handled: boolean) {
+  return run(() => contactRequests.setContactRequestHandled(db, uuid.parse(id), handled));
+}
+
+export async function deleteContactRequestAction(id: string) {
+  return run(() => contactRequests.deleteContactRequest(db, uuid.parse(id)));
 }

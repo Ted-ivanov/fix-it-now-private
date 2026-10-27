@@ -4,6 +4,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -74,6 +75,39 @@ export const team = pgTable("team", {
   ...timestamps,
 });
 
+export type CalendarReminder = { method: "popup" | "email"; minutes: number };
+
+// A person in a team. Each member can connect their own Google Calendar: the team's bookings
+// are then written into it, with the member's own reminder times.
+export const teamMember = pgTable(
+  "team_member",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => team.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    // If set, only the Google account with this email can be connected.
+    email: text("email"),
+    reminders: jsonb("reminders")
+      .$type<CalendarReminder[]>()
+      .notNull()
+      .default([
+        { method: "popup", minutes: 1440 },
+        { method: "popup", minutes: 60 },
+      ]),
+    googleEmail: text("google_email"),
+    googleRefreshToken: text("google_refresh_token"), // AES-GCM encrypted, see server/google/crypto.ts
+    googleConnectedAt: timestamp("google_connected_at", { withTimezone: true }),
+    // Last sync problem shown in the admin, e.g. access revoked in the Google account.
+    googleError: text("google_error"),
+    // One-time value inside the connect link; cleared when the link is used.
+    connectNonce: text("connect_nonce"),
+    ...timestamps,
+  },
+  (t) => [index("team_member_team").on(t.teamId)],
+);
+
 export const teamCategory = pgTable(
   "team_category",
   {
@@ -129,6 +163,8 @@ export const settings = pgTable("settings", {
   bookingHorizonDays: integer("booking_horizon_days").notNull().default(30),
   minNoticeHours: integer("min_notice_hours").notNull().default(12),
   notificationEmail: text("notification_email"),
+  // Recipients of the chat bot's contact requests. Empty means notificationEmail is used.
+  contactEmails: text("contact_emails").array().notNull().default([]),
   ...timestamps,
 });
 
@@ -183,6 +219,24 @@ export const bookingPhoto = pgTable("booking_photo", {
   height: integer("height").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Contact requests left through the chat bot on the site.
+export const contactRequest = pgTable(
+  "contact_request",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    phone: text("phone"), // normalized, e.g. +359888123456
+    email: text("email"),
+    description: text("description").notNull(),
+    locale: localeEnum("locale").notNull().default("bg"),
+    pageUrl: text("page_url"), // where the visitor opened the chat
+    handled: boolean("handled").notNull().default(false),
+    consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (t) => [index("contact_request_created").on(t.createdAt)],
+);
 
 // Simple fixed-window rate limiter that works on serverless (no in-memory state).
 export const rateLimit = pgTable("rate_limit", {
@@ -249,6 +303,11 @@ export const teamRelations = relations(team, ({ many }) => ({
   categories: many(teamCategory),
   workingHours: many(workingHours),
   timeOff: many(teamTimeOff),
+  members: many(teamMember),
+}));
+
+export const teamMemberRelations = relations(teamMember, ({ one }) => ({
+  team: one(team, { fields: [teamMember.teamId], references: [team.id] }),
 }));
 
 export const teamCategoryRelations = relations(teamCategory, ({ one }) => ({

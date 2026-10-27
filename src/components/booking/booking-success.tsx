@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarCheck, CircleCheck } from "lucide-react";
+import { CalendarCheck, CalendarPlus, CircleCheck } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,21 @@ export function BookingSuccess({ result, homeHref = "/" }: { result: Result; hom
           </dd>
         </div>
       </dl>
+      <p className="text-muted-foreground mt-6 text-sm">{t("addToCalendar")}</p>
+      <div className="mt-2 flex flex-wrap justify-center gap-2">
+        <Button asChild variant="secondary" size="sm">
+          <a href={result.calendar.google} target="_blank" rel="noopener noreferrer">
+            <CalendarPlus className="size-4" aria-hidden />
+            {t("googleCalendar")}
+          </a>
+        </Button>
+        <Button asChild variant="secondary" size="sm">
+          <a href={result.calendar.ics} download>
+            <CalendarPlus className="size-4" aria-hidden />
+            {t("otherCalendar")}
+          </a>
+        </Button>
+      </div>
       <Button asChild variant="outline" className="mt-8">
         <Link href={homeHref}>{t("backHome")}</Link>
       </Button>

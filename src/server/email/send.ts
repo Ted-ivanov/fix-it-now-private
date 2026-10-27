@@ -6,10 +6,10 @@ import { env } from "@/server/env";
 const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
 /** Sends an email with Resend, or prints it to the terminal when no API key is set. */
-export async function sendEmail(params: { to: string; subject: string; react: ReactElement; replyTo?: string }) {
+export async function sendEmail(params: { to: string | string[]; subject: string; react: ReactElement; replyTo?: string }) {
   const text = await render(params.react, { plainText: true });
   if (!resend) {
-    console.info(`\n[email] to: ${params.to}\n[email] subject: ${params.subject}\n${text}\n`);
+    console.info(`\n[email] to: ${[params.to].flat().join(", ")}\n[email] subject: ${params.subject}\n${text}\n`);
     return;
   }
   const { error } = await resend.emails.send({

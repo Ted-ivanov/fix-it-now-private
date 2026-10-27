@@ -6,6 +6,7 @@ import {
   Heading,
   Hr,
   Html,
+  Link,
   Preview,
   Section,
   Text,
@@ -33,6 +34,9 @@ const strings = {
     cancelledSubject: (ref: string) => `Посещение ${ref} е отказано – Fix It Now`,
     cancelledBody: (when: string) => `Посещението ви на ${when} е отказано. Можете да запазите нов час по всяко време на сайта.`,
     visitTypes: { inspection: "Оглед и оферта", repair: "Посещение за ремонт" },
+    addToCalendar: "Добавете посещението в календара си, за да получите напомняне:",
+    googleCalendar: "Google Calendar",
+    otherCalendar: "iPhone / Outlook (.ics)",
   },
   en: {
     confirmSubject: (ref: string) => `Visit confirmation ${ref} – Fix It Now`,
@@ -52,6 +56,9 @@ const strings = {
     cancelledSubject: (ref: string) => `Visit ${ref} cancelled – Fix It Now`,
     cancelledBody: (when: string) => `Your visit on ${when} has been cancelled. You can book a new time on our website at any time.`,
     visitTypes: { inspection: "Inspection & Quote", repair: "Repair visit" },
+    addToCalendar: "Add the visit to your calendar to get a reminder:",
+    googleCalendar: "Google Calendar",
+    otherCalendar: "iPhone / Outlook (.ics)",
   },
 } as const;
 
@@ -62,6 +69,7 @@ const styles = {
   label: { color: "#6b7280", fontSize: "13px", margin: "0" },
   value: { fontSize: "15px", margin: "0 0 12px" },
   button: { backgroundColor: "#c2410c", color: "#ffffff", borderRadius: "8px", padding: "12px 20px", fontWeight: 600 },
+  link: { color: "#c2410c", fontWeight: 600 },
 };
 
 export type BookingEmailData = {
@@ -74,7 +82,15 @@ export type BookingEmailData = {
   cancelUrl: string;
 };
 
-export function BookingConfirmationEmail({ lang, data }: { lang: Lang; data: BookingEmailData }) {
+export function BookingConfirmationEmail({
+  lang,
+  data,
+  calendar,
+}: {
+  lang: Lang;
+  data: BookingEmailData;
+  calendar: { google: string; ics: string };
+}) {
   const s = strings[lang];
   const rows: [string, string][] = [
     [s.ref, data.ref],
@@ -104,6 +120,17 @@ export function BookingConfirmationEmail({ lang, data }: { lang: Lang; data: Boo
             ))}
           </Section>
           {data.visitType === "repair" && <Text style={{ fontSize: "14px", color: "#9a3412" }}>{s.repairNote}</Text>}
+          <Text>
+            {s.addToCalendar}
+            <br />
+            <Link href={calendar.google} style={styles.link}>
+              {s.googleCalendar}
+            </Link>
+            {" · "}
+            <Link href={calendar.ics} style={styles.link}>
+              {s.otherCalendar}
+            </Link>
+          </Text>
           <Hr />
           <Text>{s.cancelText}</Text>
           <Button href={data.cancelUrl} style={styles.button}>
@@ -189,6 +216,56 @@ export function NewBookingAdminEmail({
           </Section>
           <Button href={adminUrl} style={styles.button}>
             Отвори в администрацията
+          </Button>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+
+/** Chat bot contact request for the office (always Bulgarian). */
+export function ContactRequestAdminEmail({
+  name,
+  phone,
+  email,
+  description,
+  when,
+  adminUrl,
+}: {
+  name: string;
+  phone: string | null;
+  email: string | null;
+  description: string;
+  when: string;
+  adminUrl: string;
+}) {
+  const rows: [string, string][] = [
+    ["Получено", when],
+    ["Име", name],
+    ["Телефон", phone ? formatPhone(phone) : "—"],
+    ["Имейл", email ?? "—"],
+  ];
+  return (
+    <Html lang="bg">
+      <Head />
+      <Preview>{`Ново запитване от ${name}`}</Preview>
+      <Body style={styles.body}>
+        <Container style={styles.container}>
+          <Heading as="h1" style={{ fontSize: "20px" }}>
+            Ново запитване от чата
+          </Heading>
+          <Section>
+            {rows.map(([label, value]) => (
+              <div key={label}>
+                <Text style={styles.label}>{label}</Text>
+                <Text style={styles.value}>{value}</Text>
+              </div>
+            ))}
+            <Text style={styles.label}>Каква работа е нужна</Text>
+            <Text style={{ ...styles.value, whiteSpace: "pre-wrap" }}>{description}</Text>
+          </Section>
+          <Button href={adminUrl} style={styles.button}>
+            Всички запитвания
           </Button>
         </Container>
       </Body>

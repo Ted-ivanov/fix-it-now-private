@@ -113,8 +113,8 @@ export async function seed(db: Db) {
 export async function truncateAll(db: Db) {
   await db.execute(sql`
     TRUNCATE booking_photo, booking, gallery_photo, gallery, team_time_off, working_hours,
-      team_category, team, visit_type_config, service_category, closed_day, settings,
-      rate_limit, session, account, verification, "user"
+      team_category, team_member, team, visit_type_config, service_category, closed_day, settings,
+      contact_request, rate_limit, session, account, verification, "user"
     RESTART IDENTITY CASCADE
   `);
 }

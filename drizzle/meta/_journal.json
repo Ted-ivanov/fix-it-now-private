@@ -15,6 +15,20 @@
       "when": 1790581391272,
       "tag": "0001_booking_no_overlap",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790674962859,
+      "tag": "0002_team_member_calendar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792478231834,
+      "tag": "0003_contact_request",
+      "breakpoints": true
     }
   ]
 }

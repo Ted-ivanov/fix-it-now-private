@@ -2,7 +2,7 @@ import { db } from "@/server/db";
 import { getCompanyHours, listCategoriesWithDurations, listClosedDays } from "@/server/services/admin";
 import { getSettings } from "@/server/services/settings";
 import { PageHeader } from "../../_components/page-header";
-import { CategoryEditor, ClosedDaysEditor, CompanyHoursForm, RulesForm } from "./settings-forms";
+import { CategoryEditor, ClosedDaysEditor, CompanyHoursForm, ContactEmailsForm, RulesForm } from "./settings-forms";
 
 export const metadata = { title: "Настройки" };
 
@@ -26,6 +26,7 @@ export default async function SettingsPage() {
             notificationEmail: settings.notificationEmail ?? "",
           }}
         />
+        <ContactEmailsForm initial={settings.contactEmails} fallback={settings.notificationEmail} />
         <CompanyHoursForm initial={hours.map(({ weekday, openMinute, closeMinute }) => ({ weekday, openMinute, closeMinute }))} />
         <ClosedDaysEditor days={closedDays.map((d) => ({ day: d.day, note: d.note }))} />
         <section className="grid gap-4">
